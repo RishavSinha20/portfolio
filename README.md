@@ -5,7 +5,7 @@ A personal portfolio website showcasing my experience, projects, achievements, a
 ## Live Website
 
 **Portfolio:**
-https://rishavsinha20.github.io
+https://rishavsinha20.github.io/portfolio/
 
 ## Overview
 
