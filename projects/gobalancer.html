@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>GoBalancer | Case Study</title>
+
+    <link rel="stylesheet" href="../style.css">
+
+</head>
+
+<body>
+
+    <nav>
+
+        <div class="logo">
+            GoBalancer
+        </div>
+
+        <div class="nav-links">
+            <a href="../index.html">Home</a>
+        </div>
+
+    </nav>
+
+    <section class="hero">
+
+        <div class="badge">
+            Infrastructure Project
+        </div>
+
+        <h1>
+            GoBalancer
+        </h1>
+
+        <p>
+            Layer 7 reverse proxy load balancer built in Go
+            featuring Round Robin scheduling, backend health
+            checks and fault tolerant traffic routing.
+        </p>
+
+        <div class="hero-buttons">
+
+            <a href="https://github.com/RishavSinha20/GoBalancer"
+                target="_blank"
+                class="primary-btn">
+                GitHub
+            </a>
+
+        </div>
+
+    </section>
+
+    <section>
+
+        <h2>Overview</h2>
+
+        <p class="section-text">
+            GoBalancer is a reverse proxy load balancer built
+            from scratch to understand how production systems
+            distribute traffic across multiple backend servers.
+        </p>
+
+    </section>
+
+    <section>
+
+        <h2>Architecture</h2>
+
+        <div class="architecture">
+
+            <div class="node">
+                Client
+            </div>
+
+            <div class="arrow">
+                ↓
+            </div>
+
+            <div class="node">
+                GoBalancer
+            </div>
+
+            <div class="arrow">
+                ↓
+            </div>
+
+            <div class="backend-container">
+
+                <div class="node">
+                    Backend 1
+                </div>
+
+                <div class="node">
+                    Backend 2
+                </div>
+
+                <div class="node">
+                    Backend 3
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <section>
+
+        <h2>Key Features</h2>
+
+        <div class="features-grid">
+
+            <div class="feature-card">
+                Reverse Proxy
+            </div>
+
+            <div class="feature-card">
+                Round Robin
+            </div>
+
+            <div class="feature-card">
+                Health Checks
+            </div>
+
+            <div class="feature-card">
+                Fault Tolerance
+            </div>
+
+        </div>
+
+    </section>
+
+    <section>
+
+        <h2>Request Lifecycle</h2>
+
+        <ol class="flow">
+
+            <li>Client sends HTTP request</li>
+
+            <li>Load balancer receives request</li>
+
+            <li>Round Robin selects backend</li>
+
+            <li>Health status verified</li>
+
+            <li>Request forwarded</li>
+
+            <li>Response returned to client</li>
+
+        </ol>
+
+    </section>
+
+    <section>
+
+        <h2>Lessons Learned</h2>
+
+        <p class="section-text">
+
+            Building GoBalancer helped me understand:
+
+        </p>
+
+        <ul class="flow">
+
+            <li>Reverse Proxy Internals</li>
+            <li>Concurrency in Go</li>
+            <li>Load Balancing Algorithms</li>
+            <li>Fault Tolerant Design</li>
+            <li>Backend Health Monitoring</li>
+
+        </ul>
+
+    </section>
+
+</body>
+
+</html>
