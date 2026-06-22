@@ -26,21 +26,44 @@
 
     </nav>
 
-    <section class="hero">
+    <section class="hero case-study-hero">
 
         <div class="badge">
-            Infrastructure Project
+            Case Study
         </div>
 
         <h1>
-            GoBalancer
+            Why
+            <span id="typing-project"></span>?
         </h1>
 
-        <p>
-            Layer 7 reverse proxy load balancer built in Go
-            featuring Round Robin scheduling, backend health
-            checks and fault tolerant traffic routing.
-        </p>
+        <div class="why-layout">
+
+            <p class="section-text">
+                I started GoBalancer because I wanted to stop treating
+                load balancing as a black box. In most tutorials,
+                everything works perfectly and every backend stays up,
+                but that is not how real systems behave.
+
+                I wanted to understand what actually happens when a
+                server slows down, crashes, or starts timing out while
+                users are still sending traffic. Building this project
+                from scratch helped me see the practical decisions
+                behind routing strategy, retries, caching, and rate
+                limiting instead of just reading about them.
+
+                The goal was simple: build something close enough to a
+                production mindset that I could reason about tradeoffs,
+                failure behavior, and recovery with confidence.
+            </p>
+
+            <div class="why-image-wrap">
+                <img src="../images/why-question-marks.svg"
+                    alt="Question marks representing why GoBalancer was built"
+                    class="why-image">
+            </div>
+
+        </div>
 
         <div class="hero-buttons">
 
@@ -56,19 +79,57 @@
 
     <section>
 
-        <h2>Overview</h2>
+        <h2>Problem Statement</h2>
 
         <p class="section-text">
-            GoBalancer is a reverse proxy load balancer built
-            from scratch to understand how production systems
-            distribute traffic across multiple backend servers.
+            A single backend service is a bottleneck and a single
+            point of failure. The goal was to build a traffic
+            router that can spread load, detect unhealthy nodes,
+            recover automatically, and fail gracefully when no
+            healthy backend exists.
         </p>
+
+        <div class="case-grid">
+
+            <div class="case-card">
+                <h3>Primary Goal</h3>
+                <p>
+                    Route requests reliably across multiple backend
+                    servers using strategy driven selection.
+                </p>
+            </div>
+
+            <div class="case-card">
+                <h3>Reliability Goal</h3>
+                <p>
+                    Maintain availability under partial failures via
+                    health checks, retries, and failover.
+                </p>
+            </div>
+
+            <div class="case-card">
+                <h3>Performance Goal</h3>
+                <p>
+                    Reduce backend pressure with caching and control
+                    request bursts with rate limiting.
+                </p>
+            </div>
+
+            <div class="case-card">
+                <h3>Observability Goal</h3>
+                <p>
+                    Track request and failure counts to validate if
+                    routing behavior matches expectations.
+                </p>
+            </div>
+
+        </div>
 
     </section>
 
     <section>
 
-        <h2>Architecture</h2>
+        <h2>Architecture Snapshot</h2>
 
         <div class="architecture">
 
@@ -110,24 +171,130 @@
 
     <section>
 
-        <h2>Key Features</h2>
+        <h2>Design Decisions And Why</h2>
 
-        <div class="features-grid">
+        <div class="decision-list">
 
-            <div class="feature-card">
-                Reverse Proxy
+            <div class="decision-card">
+                <h3>Reverse Proxy Core</h3>
+                <p>
+                    Built on Go's reverse proxy primitives to keep
+                    request forwarding standards compliant while
+                    leaving room for custom retry and cache logic.
+                </p>
             </div>
 
-            <div class="feature-card">
-                Round Robin
+            <div class="decision-card">
+                <h3>Multiple Routing Strategies</h3>
+                <p>
+                    Implemented Round Robin, Least Connections, and
+                    IP Hash because no single policy is ideal for all
+                    workloads. Strategy is configuration driven.
+                </p>
             </div>
 
-            <div class="feature-card">
-                Health Checks
+            <div class="decision-card">
+                <h3>Active Health Checks</h3>
+                <p>
+                    Backend probes run on an interval so unhealthy
+                    targets are removed quickly, then reintroduced
+                    automatically after recovery.
+                </p>
             </div>
 
-            <div class="feature-card">
-                Fault Tolerance
+            <div class="decision-card">
+                <h3>Retry Before Failing</h3>
+                <p>
+                    Requests get retry attempts across different
+                    targets before returning 503, improving perceived
+                    reliability during transient backend failures.
+                </p>
+            </div>
+
+            <div class="decision-card">
+                <h3>In-Memory GET Caching</h3>
+                <p>
+                    Added TTL based caching for idempotent GET
+                    requests to reduce repeated backend work and
+                    improve response latency on hot paths.
+                </p>
+            </div>
+
+            <div class="decision-card">
+                <h3>Rate Limiting Middleware</h3>
+                <p>
+                    Token based limiting protects downstream
+                    backends from burst traffic and makes overload
+                    behavior explicit with 429 responses.
+                </p>
+            </div>
+
+        </div>
+
+    </section>
+
+    <section>
+
+        <h2>Implementation Highlights</h2>
+
+        <div class="implementation-diagram">
+
+            <div class="impl-step">
+                <h3>Config Layer</h3>
+                <p>
+                    YAML controls port, strategy, and backend pool
+                    so behavior can change without code edits.
+                </p>
+            </div>
+
+            <div class="impl-arrow" aria-hidden="true"></div>
+
+            <div class="impl-step">
+                <h3>Routing Layer</h3>
+                <p>
+                    Round Robin, Least Connections, and IP Hash are
+                    selected through a strategy driven balancer.
+                </p>
+            </div>
+
+            <div class="impl-arrow" aria-hidden="true"></div>
+
+            <div class="impl-step">
+                <h3>Health Layer</h3>
+                <p>
+                    Periodic probes mark nodes up or down for
+                    automatic failover and recovery.
+                </p>
+            </div>
+
+            <div class="impl-arrow" aria-hidden="true"></div>
+
+            <div class="impl-step">
+                <h3>Proxy Layer</h3>
+                <p>
+                    Reverse proxy forwarding applies retries and
+                    fallback 503 handling during outages.
+                </p>
+            </div>
+
+            <div class="impl-arrow" aria-hidden="true"></div>
+
+            <div class="impl-step">
+                <h3>Performance Layer</h3>
+                <p>
+                    GET response caching and token-based rate
+                    limiting protect backend resources.
+                </p>
+            </div>
+
+            <div class="impl-arrow" aria-hidden="true"></div>
+
+            <div class="impl-step">
+                <h3>Metrics Layer</h3>
+                <p>
+                    Atomic request and failure counters expose live
+                    system behavior for visibility.
+                </p>
             </div>
 
         </div>
@@ -138,45 +305,202 @@
 
         <h2>Request Lifecycle</h2>
 
-        <ol class="flow">
+        <div class="lifecycle-diagram">
 
-            <li>Client sends HTTP request</li>
+            <div class="lifecycle-rail">
 
-            <li>Load balancer receives request</li>
+                <div class="step-box core-step">
+                1. Client Request
+                </div>
 
-            <li>Round Robin selects backend</li>
+                <div class="flow-arrow" aria-hidden="true"></div>
 
-            <li>Health status verified</li>
+                <div class="step-box core-step">
+                2. Rate Limit Check
+                </div>
 
-            <li>Request forwarded</li>
+                <div class="flow-arrow" aria-hidden="true"></div>
 
-            <li>Response returned to client</li>
+                <div class="step-box core-step">
+                3. Strategy Selects Backend
+                </div>
 
-        </ol>
+                <div class="flow-arrow" aria-hidden="true"></div>
+
+                <div class="step-box core-step">
+                4. Health State Verified
+                </div>
+
+                <div class="flow-arrow" aria-hidden="true"></div>
+
+                <div class="step-box core-step">
+                5. Proxy Forwards Request
+                </div>
+
+                <div class="flow-arrow" aria-hidden="true"></div>
+
+                <div class="step-box core-step decision-step">
+                6. Success?
+                </div>
+
+            </div>
+
+            <div class="branch-split" aria-hidden="true">
+                <div class="split-line"></div>
+                <div class="split-line"></div>
+            </div>
+
+            <div class="branch-path success-path">
+
+                <div class="step-box success-box">
+                    7A. Cache GET Response
+                </div>
+
+                <div class="flow-arrow success-arrow" aria-hidden="true"></div>
+
+                <div class="step-box success-box">
+                    8A. Return Response
+                </div>
+
+            </div>
+
+            <div class="branch-path retry-path">
+
+                <div class="step-box retry-box">
+                    7B. Retry Another Backend
+                </div>
+
+                <div class="flow-arrow retry-arrow" aria-hidden="true"></div>
+
+                <div class="step-box retry-box">
+                    8B. Exhausted? Return 503
+                </div>
+
+            </div>
+
+        </div>
 
     </section>
 
     <section>
 
-        <h2>Lessons Learned</h2>
+        <h2>Tradeoffs</h2>
 
-        <p class="section-text">
+        <div class="case-grid">
 
-            Building GoBalancer helped me understand:
+            <div class="case-card">
+                <h3>Caching</h3>
+                <p>
+                    Improves latency and reduces backend load, but
+                    introduces stale data risk and memory overhead.
+                </p>
+            </div>
 
-        </p>
+            <div class="case-card">
+                <h3>Retry Logic</h3>
+                <p>
+                    Increases resiliency for transient issues, but
+                    can generate extra traffic during outages.
+                </p>
+            </div>
 
-        <ul class="flow">
+            <div class="case-card">
+                <h3>Least Connections</h3>
+                <p>
+                    Better for uneven workloads, but requires active
+                    connection accounting per backend.
+                </p>
+            </div>
 
-            <li>Reverse Proxy Internals</li>
-            <li>Concurrency in Go</li>
-            <li>Load Balancing Algorithms</li>
-            <li>Fault Tolerant Design</li>
-            <li>Backend Health Monitoring</li>
+            <div class="case-card">
+                <h3>Rate Limiting</h3>
+                <p>
+                    Protects infrastructure under bursts, but can
+                    reject legitimate spikes with 429 responses.
+                </p>
+            </div>
 
-        </ul>
+        </div>
 
     </section>
+
+    <section>
+
+        <h2>Media Placeholders</h2>
+
+        <div class="media-grid">
+
+            <div class="media-card">
+                <h3>Demo Video Placeholder</h3>
+                <p>
+                    Add a short walkthrough showing request routing,
+                    failover, and recovery behavior under load.
+                </p>
+            </div>
+
+            <div class="media-card">
+                <h3>Architecture Diagram Placeholder</h3>
+                <p>
+                    Add a system diagram with reverse proxy flow,
+                    strategy selection, and health check loop.
+                </p>
+            </div>
+
+            <div class="media-card">
+                <h3>Testing Evidence Placeholder</h3>
+                <p>
+                    Add terminal screenshots for 429 and 503 paths,
+                    plus backend up/down log snapshots.
+                </p>
+            </div>
+
+            <div class="media-card">
+                <h3>Metrics Snapshot Placeholder</h3>
+                <p>
+                    Add a sample metrics output screenshot showing
+                    total requests and failure counts.
+                </p>
+            </div>
+
+        </div>
+
+    </section>
+
+    <script>
+        const projectName = "GoBalancer";
+        const projectTypingElement = document.getElementById("typing-project");
+
+        let projectCharIndex = 0;
+        let projectDeleting = false;
+
+        function typeProjectName() {
+            if (!projectTypingElement) {
+                return;
+            }
+
+            if (!projectDeleting) {
+                projectTypingElement.textContent = projectName.substring(0, projectCharIndex + 1);
+                projectCharIndex++;
+
+                if (projectCharIndex === projectName.length) {
+                    projectDeleting = true;
+                    setTimeout(typeProjectName, 1200);
+                    return;
+                }
+            } else {
+                projectTypingElement.textContent = projectName.substring(0, projectCharIndex - 1);
+                projectCharIndex--;
+
+                if (projectCharIndex === 0) {
+                    projectDeleting = false;
+                }
+            }
+
+            setTimeout(typeProjectName, projectDeleting ? 70 : 110);
+        }
+
+        typeProjectName();
+    </script>
 
 </body>
 
