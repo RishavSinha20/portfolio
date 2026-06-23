@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>KVault | Case Study</title>
+
+    <link rel="stylesheet" href="../style.css">
+
+</head>
+
+<body>
+
+    <nav>
+
+        <div class="logo">
+            KVault
+        </div>
+
+        <div class="nav-links">
+            <a href="../index.html">Home</a>
+        </div>
+
+    </nav>
+
+    <section class="hero case-study-hero">
+
+        <div class="badge">
+            Case Study
+        </div>
+
+        <h1>
+            Why
+            <span id="typing-project"></span>?
+        </h1>
+
+        <div class="why-layout">
+
+            <p class="section-text">
+                I started KVault to understand how systems like Redis, etcd, Consul, and
+                ZooKeeper work internally. These systems power real infrastructure, but most
+                tutorials gloss over the hard parts: how do you persist data safely? What
+                happens when a node crashes? How do replicas stay in sync?
+
+                Building KVault from scratch forced me to confront these questions. I evolved
+                it from a simple in-memory store into a fault-tolerant distributed system
+                with Write-Ahead Logging, replication, and automatic leader election. Each
+                layer revealed new tradeoffs between durability, consistency, and performance.
+
+                The goal was educational: understand the fundamental building blocks that
+                make modern data systems reliable, so I could reason about their design with
+                confidence.
+            </p>
+
+            <div class="why-image-wrap">
+                <img src="../images/why-question-marks.svg"
+                    alt="Question marks representing why KVault was built"
+                    class="why-image">
+            </div>
+
+        </div>
+
+        <div class="hero-buttons">
+
+            <a href="https://github.com/RishavSinha20/kvault"
+                target="_blank"
+                class="primary-btn">
+                GitHub
+            </a>
+
+        </div>
+
+    </section>
+
+    <section>
+
+        <h2>The Evolution Path</h2>
+
+        <p class="section-text">
+            KVault was not built all at once. It evolved in layers, each solving a new failure mode:
+        </p>
+
+        <div class="case-grid">
+
+            <div class="case-card">
+                <h3>Phase 1: In-Memory Store</h3>
+                <p>
+                    Start with a simple concurrent key-value map using RWMutex. Fast,
+                    but loses all data on crash.
+                </p>
+            </div>
+
+            <div class="case-card">
+                <h3>Phase 2: Write-Ahead Log</h3>
+                <p>
+                    Add persistence layer. Before modifying memory, write to WAL on disk.
+                    Now data survives crashes and can be replayed on restart.
+                </p>
+            </div>
+
+            <div class="case-card">
+                <h3>Phase 3: Leader-Follower Replication</h3>
+                <p>
+                    Add multiple nodes. Leader handles all writes and replicates them to
+                    followers. Now a single node failure doesn't lose data.
+                </p>
+            </div>
+
+            <div class="case-card">
+                <h3>Phase 4: Automatic Failover</h3>
+                <p>
+                    Add heartbeat monitoring and leader election. When leader dies,
+                    followers detect it and promote one to leader automatically.
+                </p>
+            </div>
+
+        </div>
+
+    </section>
+
+    <section>
+
+        <h2>Core Problem Solved</h2>
+
+        <p class="section-text">
+            Traditional single-node key-value stores face two critical failures:
+        </p>
+
+        <div class="case-grid">
+
+            <div class="case-card">
+                <h3>Data Loss on Crash</h3>
+                <p>
+                    Without persistence, restarting the process wipes all data. In-memory
+                    only works for caches, not databases.
+                </p>
+            </div>
+
+            <div class="case-card">
+                <h3>Unavailability on Node Failure</h3>
+                <p>
+                    When the single node dies, the entire system is down. Clients lose
+                    read and write access until manual recovery.
+                </p>
+            </div>
+
+            <div class="case-card">
+                <h3>KVault Solution: WAL + Replication</h3>
+                <p>
+                    Writes survive crashes via WAL. Replicas survive node death via
+                    distributed state. Leader election restores availability automatically.
+                </p>
+            </div>
+
+            <div class="case-card">
+                <h3>Result</h3>
+                <p>
+                    A fault-tolerant key-value store that can survive any single node
+                    failure without data loss or manual intervention.
+                </p>
+            </div>
+
+        </div>
+
+    </section>
+
+    <section>
+
+        <h2>Three Core Layers</h2>
+
+        <p class="section-text">
+            KVault's architecture separates concerns into three independent layers:
+        </p>
+
+        <div class="implementation-diagram">
+
+            <div class="impl-step">
+                <h3>Storage Layer</h3>
+                <p>
+                    In-memory concurrent hash map protected by RWMutex. Allows multiple
+                    readers, serializes writers for correctness.
+                </p>
+            </div>
+
+            <div class="impl-arrow" aria-hidden="true"></div>
+
+            <div class="impl-step">
+                <h3>Durability Layer</h3>
+                <p>
+                    Write-Ahead Log (WAL) persists every operation to disk before
+                    modifying memory. On restart, replay WAL to recover state.
+                </p>
+            </div>
+
+            <div class="impl-arrow" aria-hidden="true"></div>
+
+            <div class="impl-step">
+                <h3>Replication Layer</h3>
+                <p>
+                    Leader coordinates writes across follower replicas. Each replica
+                    maintains its own WAL. Heartbeats detect failures and trigger election.
+                </p>
+            </div>
+
+        </div>
+
+    </section>
+
+    <section>
+
+        <h2>Write Path: From Client to Disk to Followers</h2>
+
+        <div class="lifecycle-diagram">
+
+            <div class="lifecycle-rail">
+
+                <div class="step-box core-step">
+                1. Client Sends Put Request
+                </div>
+
+                <div class="flow-arrow" aria-hidden="true"></div>
+
+                <div class="step-box core-step">
+                2. Leader Writes to WAL
+                </div>
+
+                <div class="flow-arrow" aria-hidden="true"></div>
+
+                <div class="step-box core-step">
+                3. Leader Updates Memory
+                </div>
+
+                <div class="flow-arrow" aria-hidden="true"></div>
+
+                <div class="step-box core-step">
+                4. Leader Sends to Followers
+                </div>
+
+                <div class="flow-arrow" aria-hidden="true"></div>
+
+                <div class="step-box core-step">
+                5. Each Follower Writes WAL
+                </div>
+
+                <div class="flow-arrow" aria-hidden="true"></div>
+
+                <div class="step-box core-step decision-step">
+                6. Followers Acknowledge
+                </div>
+
+            </div>
+
+            <div class="branch-split" aria-hidden="true">
+                <div class="split-line"></div>
+                <div class="split-line"></div>
+            </div>
+
+            <div class="branch-path success-path">
+
+                <div class="step-box success-box">
+                7A. Write Committed
+                </div>
+
+                <div class="flow-arrow success-arrow" aria-hidden="true"></div>
+
+                <div class="step-box success-box">
+                    8A. Return Success to Client
+                </div>
+
+            </div>
+
+            <div class="branch-path retry-path">
+
+                <div class="step-box retry-box">
+                    7B. Timeout on Follower
+                </div>
+
+                <div class="flow-arrow retry-arrow" aria-hidden="true"></div>
+
+                <div class="step-box retry-box">
+                    8B. Return Error to Client
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <section>
+
+        <h2>Recovery Path: From Disk Back to Memory</h2>
+
+        <p class="section-text">
+            When a node crashes and restarts, it replays its WAL to reconstruct the entire
+            state without losing any committed data:
+        </p>
+
+        <div class="lifecycle-diagram">
+
+            <div class="lifecycle-rail">
+
+                <div class="step-box core-step">
+                Node Restart
+                </div>
+
+                <div class="flow-arrow" aria-hidden="true"></div>
+
+                <div class="step-box core-step">
+                Read WAL File
+                </div>
+
+                <div class="flow-arrow" aria-hidden="true"></div>
+
+                <div class="step-box core-step">
+                Parse Entries
+                </div>
+
+                <div class="flow-arrow" aria-hidden="true"></div>
+
+                <div class="step-box core-step">
+                Replay in Order
+                </div>
+
+                <div class="flow-arrow" aria-hidden="true"></div>
+
+                <div class="step-box core-step">
+                Rebuild Memory
+                </div>
+
+                <div class="flow-arrow" aria-hidden="true"></div>
+
+                <div class="step-box core-step">
+                Join Cluster
+                </div>
+
+                <div class="flow-arrow" aria-hidden="true"></div>
+
+                <div class="step-box success-box">
+                Recovery Complete
+                </div>
+
+            </div>
+
+        </div>
+
+        <p class="section-text" style="margin-top: 20px;">
+            <strong>Result:</strong> No data loss. The recovered node has identical state to before the
+            crash and can serve reads and writes immediately.
+        </p>
+
+    </section>
+
+    <section>
+
+        <h2>Failover Path: When Leader Dies</h2>
+
+        <p class="section-text">
+            Heartbeats enable automatic detection and recovery:
+        </p>
+
+        <div class="lifecycle-diagram">
+
+            <div class="lifecycle-rail">
+
+                <div class="step-box core-step">
+                Leader Alive
+                </div>
+
+                <div class="flow-arrow" aria-hidden="true"></div>
+
+                <div class="step-box core-step">
+                Sends Heartbeats
+                </div>
+
+                <div class="flow-arrow" aria-hidden="true"></div>
+
+                <div class="step-box core-step">
+                Leader Crashes
+                </div>
+
+                <div class="flow-arrow" aria-hidden="true"></div>
+
+                <div class="step-box core-step">
+                Heartbeat Timeout
+                </div>
+
+                <div class="flow-arrow" aria-hidden="true"></div>
+
+                <div class="step-box retry-box">
+                Follower Becomes Candidate
+                </div>
+
+                <div class="flow-arrow retry-arrow" aria-hidden="true"></div>
+
+                <div class="step-box retry-box">
+                Requests Votes
+                </div>
+
+                <div class="flow-arrow retry-arrow" aria-hidden="true"></div>
+
+                <div class="step-box success-box">
+                New Leader Elected
+                </div>
+
+            </div>
+
+        </div>
+
+        <p class="section-text" style="margin-top: 20px;">
+            Once elected, the new leader sends heartbeats and the cluster continues to accept reads and writes.
+        </p>
+
+    </section>
+
+    <section>
+
+        <h2>Design Tradeoffs</h2>
+
+        <div class="case-grid">
+
+            <div class="case-card">
+                <h3>WAL Persistence</h3>
+                <p>
+                    Pros: Crash safety, recovery without data loss.
+                    Cons: Slower writes, disk I/O overhead.
+                </p>
+            </div>
+
+            <div class="case-card">
+                <h3>RWMutex for Concurrency</h3>
+                <p>
+                    Pros: Multiple readers, good for read-heavy workloads.
+                    Cons: Simple mutex would be easier, Raft-style locking is complex.
+                </p>
+            </div>
+
+            <div class="case-card">
+                <h3>Leader-Follower Model</h3>
+                <p>
+                    Pros: Simple consistency model, centralized coordination.
+                    Cons: Can't tolerate leader+quorum failures, write bottleneck at leader.
+                </p>
+            </div>
+
+            <div class="case-card">
+                <h3>Heartbeat Frequency</h3>
+                <p>
+                    Pros: Frequent heartbeats detect failures quickly.
+                    Cons: More network traffic, false positives on slow networks.
+                </p>
+            </div>
+
+        </div>
+
+    </section>
+
+    <section>
+
+        <h2>Key Insights and Lessons</h2>
+
+        <div class="case-grid">
+
+            <div class="case-card">
+                <h3>Why Durability Matters</h3>
+                <p>
+                    Without WAL, every crash loses data. WAL turns transient memory into
+                    durable storage by forcing writes to disk before acknowledgment.
+                </p>
+            </div>
+
+            <div class="case-card">
+                <h3>Replication Solves Availability</h3>
+                <p>
+                    A single node is a single point of failure. Replication distributes
+                    state so any one node can fail without losing data.
+                </p>
+            </div>
+
+            <div class="case-card">
+                <h3>Heartbeats Are Simple but Powerful</h3>
+                <p>
+                    Detecting failures via heartbeat timeout is simple and effective. It
+                    enables automatic recovery without complex consensus protocols.
+                </p>
+            </div>
+
+            <div class="case-card">
+                <h3>Layer Separation is Key</h3>
+                <p>
+                    By separating Storage, Durability, and Replication into independent
+                    layers, each can be understood and debugged in isolation.
+                </p>
+            </div>
+
+        </div>
+
+    </section>
+
+    <section>
+
+        <h2>What This Taught Me</h2>
+
+        <p class="section-text">
+            Building KVault gave me deep intuition for distributed systems that I couldn't get
+            from reading papers. I now understand:
+        </p>
+
+        <div class="case-grid">
+
+            <div class="case-card">
+                <h3>How Redis Persistence Works</h3>
+                <p>
+                    RDB snapshots and AOF logs are different ways to solve the same problem:
+                    how to make in-memory state durable.
+                </p>
+            </div>
+
+            <div class="case-card">
+                <h3>Why Raft Exists</h3>
+                <p>
+                    Leader-follower replication with heartbeats is simple but brittle.
+                    Raft adds voting and term numbers to handle edge cases safely.
+                </p>
+            </div>
+
+            <div class="case-card">
+                <h3>The Cost of Replication</h3>
+                <p>
+                    Faster writes require fewer replicas. Durability requires slower writes.
+                    Real systems tune this based on risk tolerance.
+                </p>
+            </div>
+
+            <div class="case-card">
+                <h3>Failure Recovery is Hard</h3>
+                <p>
+                    Most bugs happen during recovery. Replaying state is tricky and edge
+                    cases hide in rare failure scenarios.
+                </p>
+            </div>
+
+        </div>
+
+    </section>
+
+    <section>
+
+        <h2>Media Placeholders</h2>
+
+        <div class="media-grid">
+
+            <div class="media-card">
+                <h3>Crash Recovery Demo</h3>
+                <p>
+                    Show storing data, killing the process, restarting it, and verifying
+                    data recovered from WAL.
+                </p>
+            </div>
+
+            <div class="media-card">
+                <h3>Replication Demo</h3>
+                <p>
+                    Show writing to leader, verifying writes appear on followers, and
+                    reading from any node.
+                </p>
+            </div>
+
+            <div class="media-card">
+                <h3>Failover Demo</h3>
+                <p>
+                    Show killing the leader, observing heartbeat timeout, new leader election,
+                    and cluster continuing to accept writes.
+                </p>
+            </div>
+
+            <div class="media-card">
+                <h3>WAL Inspection</h3>
+                <p>
+                    Show dumping the WAL file and walking through the replayed operations
+                    to demonstrate durability.
+                </p>
+            </div>
+
+        </div>
+
+    </section>
+
+    <script>
+        const projectName = "KVault";
+        const projectTypingElement = document.getElementById("typing-project");
+
+        let projectCharIndex = 0;
+        let projectDeleting = false;
+
+        function typeProjectName() {
+            if (!projectTypingElement) {
+                return;
+            }
+
+            if (!projectDeleting) {
+                projectTypingElement.textContent = projectName.substring(0, projectCharIndex + 1);
+                projectCharIndex++;
+
+                if (projectCharIndex === projectName.length) {
+                    projectDeleting = true;
+                    setTimeout(typeProjectName, 1200);
+                    return;
+                }
+            } else {
+                projectTypingElement.textContent = projectName.substring(0, projectCharIndex - 1);
+                projectCharIndex--;
+
+                if (projectCharIndex === 0) {
+                    projectDeleting = false;
+                }
+            }
+
+            setTimeout(typeProjectName, projectDeleting ? 70 : 110);
+        }
+
+        typeProjectName();
+    </script>
+
+</body>
+
+</html>
